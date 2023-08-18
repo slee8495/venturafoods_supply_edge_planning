@@ -14,6 +14,10 @@ library(scales)
 iqr_fg_top_5 <- read_excel("S:/Supply Chain Projects/LOGISTICS/SCP/Cost Saving Reporting/Inventory Days On Hand/Finished Goods Inventory Health Adjusted Forward (IQR) - 08.16.23.xlsx",
                            sheet = "Top 5 Excess SKU per Campus-")
 
+iqr_fg <- read_excel("S:/Supply Chain Projects/LOGISTICS/SCP/Cost Saving Reporting/Inventory Days On Hand/Finished Goods Inventory Health Adjusted Forward (IQR) - 08.16.23.xlsx",
+                           sheet = "Campus FG")
+
+iqr_fg_data_pre <- read_excel("S:/Supply Chain Projects/Linda Liang/Supply Chain Edge/MSTR manual file upload/IQR FG.xlsx")
 
 ##############################################################################################################################################################
 
@@ -312,6 +316,35 @@ rbind(iqr_fg_top_5_location_10_data,
                 "Loc" = loc,
                 "SKU" = sku,
                 "Excess in Dollar" = excess_in_dollar) -> iqr_fg_top_5_total
+
+
+################## IQR FG #################
+
+# IQR FG this week
+iqr_fg[-1:-2,] -> iqr_fg_data
+colnames(iqr_fg_data) <- iqr_fg_data[1, ]
+iqr_fg_data[-1, ] -> iqr_fg_data
+
+iqr_fg_data %>% 
+  data.frame() %>% 
+  janitor::clean_names() %>% 
+  dplyr::select(campus_ref, mfg_ref, campus, item_2, description, mfg_loc, mfg_line, category, macro_platform, net_wt_lbs, planner, planner_name, label,
+                weighted_unit_cost, sum_of_ss, hard_hold_in, sum_of_on_hand, on_hand_in, on_hand_max_in, sum_of_adjusted_forward_inv_target,
+                sum_of_adjusted_forward_inv_max, inv_health, iqr, iqr_hold, upi, upi_hold) %>% 
+  dplyr::mutate(date = Sys.Date()) %>% 
+  dplyr::mutate(date = paste0(strip_leading_zero(format(date, format = "%m")),
+                              "/", format(date, format = "%d/%Y"))) %>% 
+  dplyr::relocate(date) -> iqr_fg_data
+
+
+# IQR FG Previous Week
+
+# you need to convert the data, and delete the oldest date
+
+
+# Combine two
+rbind(iqr_fg_data_pre, iqr_fg_data) -> iqr_fg_data_this_week
+
 
 
 
