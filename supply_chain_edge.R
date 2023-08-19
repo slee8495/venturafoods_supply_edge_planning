@@ -364,10 +364,9 @@ iqr_fg_combined %>%
 
 # New col names
 colnames(iqr_fg_data_pre) -> iqr_fg_combined_col_names
-
 colnames(iqr_fg_combined) <- iqr_fg_combined_col_names
 
-
+iqr_fg_combined
 
 
 
