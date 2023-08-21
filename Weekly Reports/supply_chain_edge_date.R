@@ -768,10 +768,10 @@ iqr_rm_combined
 ##########################################################################################################################################################
 ##########################################################################################################################################################
 
-writexl::write_xlsx(iqr_fg_top_5_total, "C:/Users/slee/OneDrive - Ventura Foods/Ventura Work/SCE/Project/FY 24/Supply Chain Edge Micro Automation/Automation/IQR FG Top 5.xlsx")
-writexl::write_xlsx(iqr_fg_combined, "C:/Users/slee/OneDrive - Ventura Foods/Ventura Work/SCE/Project/FY 24/Supply Chain Edge Micro Automation/Automation/IQR FG.xlsx")
-writexl::write_xlsx(iqr_rm_top_5_total, "C:/Users/slee/OneDrive - Ventura Foods/Ventura Work/SCE/Project/FY 24/Supply Chain Edge Micro Automation/Automation/IQR RM Top 5.xlsx")
-writexl::write_xlsx(iqr_rm_combined, "C:/Users/slee/OneDrive - Ventura Foods/Ventura Work/SCE/Project/FY 24/Supply Chain Edge Micro Automation/Automation/IQR RM.xlsx")
+writexl::write_xlsx(iqr_fg_top_5_total, "S:/Supply Chain Projects/Linda Liang/Supply Chain Edge/MSTR manual file upload/IQR FG Top 5.xlsx")
+writexl::write_xlsx(iqr_fg_combined, "S:/Supply Chain Projects/Linda Liang/Supply Chain Edge/MSTR manual file upload/IQR FG.xlsx")
+writexl::write_xlsx(iqr_rm_top_5_total, "S:/Supply Chain Projects/Linda Liang/Supply Chain Edge/MSTR manual file upload/IQR RM Top 5.xlsx")
+writexl::write_xlsx(iqr_rm_combined, "S:/Supply Chain Projects/Linda Liang/Supply Chain Edge/MSTR manual file upload/IQR RM.xlsx")
 
 
 
