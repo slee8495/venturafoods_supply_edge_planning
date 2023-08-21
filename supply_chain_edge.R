@@ -11,6 +11,8 @@ library(rio)
 library(scales)
 
 ######################################################################## Input Data ##########################################################################
+priority_sku <- read_excel("S:/Supply Chain Projects/RStudio/Priority_Sku_and_uniques.xlsx")
+
 iqr_fg_top_5 <- read_excel("S:/Supply Chain Projects/LOGISTICS/SCP/Cost Saving Reporting/Inventory Days On Hand/Finished Goods Inventory Health Adjusted Forward (IQR) - 08.16.23.xlsx",
                            sheet = "Top 5 Excess SKU per Campus-")
 
@@ -21,6 +23,11 @@ iqr_fg_data_pre <- read_excel("S:/Supply Chain Projects/Linda Liang/Supply Chain
 
 iqr_rm_top_5 <- read_excel("S:/Supply Chain Projects/LOGISTICS/SCP/Cost Saving Reporting/Inventory Days On Hand/Raw Material Inventory Health (IQR) - 08.16.23.xlsx",
                            sheet = "Top 5 EXCESS RM per Location")
+
+iqr_rm <- read_excel("S:/Supply Chain Projects/LOGISTICS/SCP/Cost Saving Reporting/Inventory Days On Hand/Raw Material Inventory Health (IQR) - 08.16.23.xlsx",
+                     sheet = "RM data")
+
+iqr_rm_data_pre <- read_excel("S:/Supply Chain Projects/Linda Liang/Supply Chain Edge/MSTR manual file upload/IQR RM.xlsx")
 
 ##############################################################################################################################################################
 
@@ -694,6 +701,65 @@ rbind(iqr_rm_top_5_location_10_data,
                 "Item" = item,
                 "Description" = description,
                 "Excess in Dollar" = excess_in_dollar) -> iqr_rm_top_5_total
+ 
+
+
+################## IQR RM #################
+# priority sku
+priority_sku %>% 
+  janitor::clean_names() %>% 
+  dplyr::rename(used_in_priority_sku = priority_sk_us_uniques) %>% 
+  dplyr::mutate(item = used_in_priority_sku) -> priority_sku_data
+
+
+# IQR RM this week
+iqr_rm[-1:-2,] -> iqr_rm_data
+colnames(iqr_rm_data) <- iqr_rm_data[1, ]
+iqr_rm_data[-1, ] -> iqr_rm_data
+
+iqr_rm_data %>% 
+  data.frame() %>% 
+  janitor::clean_names() %>% 
+  dplyr::left_join(priority_sku_data) %>% 
+  dplyr::mutate(used_in_priority_sku = ifelse(is.na(used_in_priority_sku), "N", "Y")) %>% 
+  dplyr::rename(type = class) %>% 
+  dplyr::select(mfg_loc, loc_name, item, loc_sku, supplier, description, used_in_priority_sku, type, item_type, uo_m, lead_time, planner, planner_name,
+                standard_cost, safety_stock, usable, quality_hold, quality_hold_in, soft_hold, on_hand_usable_soft_hold, on_hand_in, target_inv, target_inv_in,
+                max_inv, max_inv_2, inv_health, iqr, upi, iqr_hold, upi_hold)  %>% 
+  dplyr::mutate(date = Sys.Date()) %>% 
+  dplyr::mutate(date = paste0(strip_leading_zero(format(date, format = "%m")),
+                              "/", format(date, format = "%d/%Y"))) %>% 
+  dplyr::relocate(date) -> iqr_rm_data
+
+
+# IQR RM Previous Week
+iqr_rm_data_pre %>% 
+  data.frame() %>% 
+  janitor::clean_names() %>% 
+  dplyr::mutate(date = paste0(strip_leading_zero(format(date, format = "%m")),
+                              "/", format(date, format = "%d/%Y"))) %>% 
+  dplyr::mutate_all(as.character)-> iqr_rm_data_pre_data
+
+# Combine two
+rbind(iqr_rm_data_pre_data, iqr_rm_data) -> iqr_rm_combined
+
+
+iqr_rm_combined %>% 
+  dplyr::mutate(date = lubridate::mdy(date)) -> iqr_rm_combined
+
+oldest_date <- min(iqr_rm_combined$date, na.rm = TRUE)
+
+iqr_rm_combined %>% 
+  dplyr::filter(date != oldest_date) %>% 
+  dplyr::mutate(date = paste0(strip_leading_zero(format(date, format = "%m")),
+                              "/", format(date, format = "%d/%Y"))) -> iqr_rm_combined
+
+
+# New col names
+colnames(iqr_rm_data_pre) -> iqr_rm_combined_col_names
+colnames(iqr_rm_combined) <- iqr_rm_combined_col_names
+
+iqr_rm_combined
 
 
 
@@ -705,7 +771,7 @@ rbind(iqr_rm_top_5_location_10_data,
 writexl::write_xlsx(iqr_fg_top_5_total, "C:/Users/slee/OneDrive - Ventura Foods/Ventura Work/SCE/Project/FY 24/Supply Chain Edge Micro Automation/Automation/IQR FG Top 5.xlsx")
 writexl::write_xlsx(iqr_fg_combined, "C:/Users/slee/OneDrive - Ventura Foods/Ventura Work/SCE/Project/FY 24/Supply Chain Edge Micro Automation/Automation/IQR FG.xlsx")
 writexl::write_xlsx(iqr_rm_top_5_total, "C:/Users/slee/OneDrive - Ventura Foods/Ventura Work/SCE/Project/FY 24/Supply Chain Edge Micro Automation/Automation/IQR RM Top 5.xlsx")
-
+writexl::write_xlsx(iqr_rm_combined, "C:/Users/slee/OneDrive - Ventura Foods/Ventura Work/SCE/Project/FY 24/Supply Chain Edge Micro Automation/Automation/IQR RM.xlsx")
 
 
 
