@@ -34,6 +34,9 @@ po_reporting_tool <- read_excel("C:/Users/slee/OneDrive - Ventura Foods/Ventura 
 
 po_reporting_tool_pre <- read_excel("S:/Supply Chain Projects/Linda Liang/Supply Chain Edge/MSTR manual file upload/PO reporting Tool.xlsx")
 
+ssc_data <- read_excel("S:/Supply Chain Projects/LOGISTICS/SCP/Cost Saving Reporting/SS Compliance/SSmetrics Archive/2023/SS Metrics 0822.xlsx")
+ssc_data_pre <- read_excel("S:/Supply Chain Projects/Linda Liang/Supply Chain Edge/MSTR manual file upload/Safety Stock Compliance Report rolling 4 weeks.xlsx")
+
 
 ##############################################################################################################################################################
 
@@ -828,6 +831,23 @@ colnames(po_reporting_tool_combined_data) <- po_reporting_tool_pre_data_col_name
 
 
 
+################## Safety Stock Compliance #################
+colnames(ssc_data) <- colnames(ssc_data_pre)
+
+ssc_data %>% 
+  data.frame() -> ssc_data_this_week
+
+ssc_data_pre %>% 
+  data.frame() -> ssc_data_pre
+
+rbind(ssc_data_pre, ssc_data_this_week) -> ssc_data_combined
+
+oldest_date <- min(ssc_data_combined$Date, na.rm = TRUE)
+
+ssc_data_combined %>% 
+  dplyr::filter(Date != oldest_date) -> ssc_data_combined
+
+
 
 ##########################################################################################################################################################
 ######################################################################## export to .xlsx format ###########################################################
@@ -839,3 +859,4 @@ writexl::write_xlsx(iqr_fg_combined, "C:/Users/slee/OneDrive - Ventura Foods/Ven
 writexl::write_xlsx(iqr_rm_top_5_total, "C:/Users/slee/OneDrive - Ventura Foods/Ventura Work/SCE/Project/FY 24/Supply Chain Edge Micro Automation/Automation/IQR RM Top 5.xlsx")
 writexl::write_xlsx(iqr_rm_combined, "C:/Users/slee/OneDrive - Ventura Foods/Ventura Work/SCE/Project/FY 24/Supply Chain Edge Micro Automation/Automation/IQR RM.xlsx")
 writexl::write_xlsx(po_reporting_tool_combined_data, "C:/Users/slee/OneDrive - Ventura Foods/Ventura Work/SCE/Project/FY 24/Supply Chain Edge Micro Automation/Automation/PO reporting Tool.xlsx")
+writexl::write_xlsx(ssc_data_combined, "C:/Users/slee/OneDrive - Ventura Foods/Ventura Work/SCE/Project/FY 24/Supply Chain Edge Micro Automation/Safety Stock Compliance Report rolling 4 weeks.xlsx")
