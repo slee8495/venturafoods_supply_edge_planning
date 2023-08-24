@@ -13,21 +13,27 @@ library(scales)
 ######################################################################## Input Data ##########################################################################
 priority_sku <- read_excel("S:/Supply Chain Projects/RStudio/Priority_Sku_and_uniques.xlsx")
 
-iqr_fg_top_5 <- read_excel("S:/Supply Chain Projects/LOGISTICS/SCP/Cost Saving Reporting/Inventory Days On Hand/Finished Goods Inventory Health Adjusted Forward (IQR) - 08.16.23.xlsx",
+iqr_fg_top_5 <- read_excel("S:/Supply Chain Projects/LOGISTICS/SCP/Cost Saving Reporting/Inventory Days On Hand/Finished Goods Inventory Health Adjusted Forward (IQR) - 08.23.23.xlsx",
                            sheet = "Top 5 Excess SKU per Campus-")
 
-iqr_fg <- read_excel("S:/Supply Chain Projects/LOGISTICS/SCP/Cost Saving Reporting/Inventory Days On Hand/Finished Goods Inventory Health Adjusted Forward (IQR) - 08.16.23.xlsx",
+iqr_fg <- read_excel("S:/Supply Chain Projects/LOGISTICS/SCP/Cost Saving Reporting/Inventory Days On Hand/Finished Goods Inventory Health Adjusted Forward (IQR) - 08.23.23.xlsx",
                            sheet = "Campus FG")
 
 iqr_fg_data_pre <- read_excel("S:/Supply Chain Projects/Linda Liang/Supply Chain Edge/MSTR manual file upload/IQR FG.xlsx")
 
-iqr_rm_top_5 <- read_excel("S:/Supply Chain Projects/LOGISTICS/SCP/Cost Saving Reporting/Inventory Days On Hand/Raw Material Inventory Health (IQR) - 08.16.23.xlsx",
+iqr_rm_top_5 <- read_excel("S:/Supply Chain Projects/LOGISTICS/SCP/Cost Saving Reporting/Inventory Days On Hand/Raw Material Inventory Health (IQR) - 08.23.23.xlsx",
                            sheet = "Top 5 EXCESS RM per Location")
 
-iqr_rm <- read_excel("S:/Supply Chain Projects/LOGISTICS/SCP/Cost Saving Reporting/Inventory Days On Hand/Raw Material Inventory Health (IQR) - 08.16.23.xlsx",
+iqr_rm <- read_excel("S:/Supply Chain Projects/LOGISTICS/SCP/Cost Saving Reporting/Inventory Days On Hand/Raw Material Inventory Health (IQR) - 08.23.23.xlsx",
                      sheet = "RM data")
 
 iqr_rm_data_pre <- read_excel("S:/Supply Chain Projects/Linda Liang/Supply Chain Edge/MSTR manual file upload/IQR RM.xlsx")
+
+po_reporting_tool <- read_excel("C:/Users/slee/OneDrive - Ventura Foods/Ventura Work/SCE/Project/FY 24/Supply Chain Edge Micro Automation/PO Reporting Tool - 08.22.23.xlsx",
+                                sheet = "Daily Open PO")
+
+po_reporting_tool_pre <- read_excel("S:/Supply Chain Projects/Linda Liang/Supply Chain Edge/MSTR manual file upload/PO reporting Tool.xlsx")
+
 
 ##############################################################################################################################################################
 
@@ -350,9 +356,7 @@ iqr_fg_data %>%
 # IQR FG Previous Week
 iqr_fg_data_pre %>% 
   data.frame() %>% 
-  janitor::clean_names() %>% 
-  dplyr::mutate(date = paste0(strip_leading_zero(format(date, format = "%m")),
-                              "/", format(date, format = "%d/%Y"))) -> iqr_fg_data_pre_data
+  janitor::clean_names() -> iqr_fg_data_pre_data
 
 # Combine two
 rbind(iqr_fg_data_pre_data, iqr_fg_data) -> iqr_fg_combined
@@ -736,8 +740,6 @@ iqr_rm_data %>%
 iqr_rm_data_pre %>% 
   data.frame() %>% 
   janitor::clean_names() %>% 
-  dplyr::mutate(date = paste0(strip_leading_zero(format(date, format = "%m")),
-                              "/", format(date, format = "%d/%Y"))) %>% 
   dplyr::mutate_all(as.character)-> iqr_rm_data_pre_data
 
 # Combine two
@@ -763,16 +765,77 @@ iqr_rm_combined
 
 
 
+################## PO Reporting Tool #################
+po_reporting_tool %>% 
+  janitor::clean_names() %>% 
+  data.frame() %>% 
+  dplyr::mutate(loc_comp = loc_item,
+                loc_comp = gsub("-", "_", loc_comp)) %>% 
+  
+  dplyr::select(last_status, next_status, po_status, order_number, loc_item, x2nd_item_number, line_description, quantity_to_receive, um, amount_to_receive,
+                original_ordered_amount, unit_cost, order_date, request_date, original_promise, promised_delivery_date, receipt_date, supplier_number,
+                supplier_name, or_ty, cancel_date, ship_to, transaction_originator, original_number, shipment_number, total_lead_time, transit_time,
+                estimated_ship_date, overdue_to_arrive, overdue_to_ship, confirm_date_overdue, manager, promise_date_req_date, location, status, 
+                partial_receipt, overdue_partial, expected_late_delivery) %>% 
+  
+  dplyr::mutate(date = Sys.Date()) %>% 
+  dplyr::mutate(date = paste0(strip_leading_zero(format(date, format = "%m")),
+                              "/", format(date, format = "%d/%Y"))) %>% 
+  dplyr::relocate(date) %>% 
+  
+  dplyr::mutate(order_date = paste0(strip_leading_zero(format(order_date, format = "%m")),
+                              "/", format(order_date, format = "%d/%Y"))) %>% 
+  dplyr::mutate(request_date = paste0(strip_leading_zero(format(request_date, format = "%m")),
+                                    "/", format(request_date, format = "%d/%Y"))) %>% 
+  dplyr::mutate(original_promise = paste0(strip_leading_zero(format(original_promise, format = "%m")),
+                                      "/", format(original_promise, format = "%d/%Y"))) %>% 
+  dplyr::mutate(promised_delivery_date  = paste0(strip_leading_zero(format(promised_delivery_date , format = "%m")),
+                                          "/", format(promised_delivery_date , format = "%d/%Y"))) %>% 
+  dplyr::mutate(estimated_ship_date  = paste0(strip_leading_zero(format(estimated_ship_date , format = "%m")),
+                                                 "/", format(estimated_ship_date , format = "%d/%Y"))) -> po_reporting_tool_data
+
+
+
+# Read PO Reporting Tool Pre Data
+po_reporting_tool_pre %>% 
+  janitor::clean_names() %>% 
+  data.frame() %>% 
+  dplyr::mutate(date = paste0(strip_leading_zero(format(date, format = "%m")),
+                              "/", format(date, format = "%d/%Y"))) %>% 
+  
+  dplyr::mutate(order_date = paste0(strip_leading_zero(format(order_date, format = "%m")),
+                                    "/", format(order_date, format = "%d/%Y"))) %>% 
+  dplyr::mutate(request_date = paste0(strip_leading_zero(format(request_date, format = "%m")),
+                                      "/", format(request_date, format = "%d/%Y"))) %>% 
+  dplyr::mutate(original_promise = paste0(strip_leading_zero(format(original_promise, format = "%m")),
+                                          "/", format(original_promise, format = "%d/%Y"))) %>% 
+  dplyr::mutate(promised_delivery_date  = paste0(strip_leading_zero(format(promised_delivery_date , format = "%m")),
+                                                 "/", format(promised_delivery_date , format = "%d/%Y"))) %>% 
+  dplyr::mutate(estimated_ship_date  = paste0(strip_leading_zero(format(estimated_ship_date , format = "%m")),
+                                              "/", format(estimated_ship_date , format = "%d/%Y"))) -> po_reporting_tool_pre_data
+
+
+rbind(po_reporting_tool_pre_data, po_reporting_tool_data) -> po_reporting_tool_combined_data
+
+oldest_date <- min(po_reporting_tool_combined_data$date, na.rm = TRUE)
+
+po_reporting_tool_combined_data %>% 
+  dplyr::filter(date != oldest_date) -> po_reporting_tool_combined_data
+
+# New col names
+colnames(po_reporting_tool_pre) -> po_reporting_tool_pre_data_col_names
+colnames(po_reporting_tool_combined_data) <- po_reporting_tool_pre_data_col_names
+
+
+
+
 ##########################################################################################################################################################
 ######################################################################## export to .xlsx format ###########################################################
 ##########################################################################################################################################################
 ##########################################################################################################################################################
 
-writexl::write_xlsx(iqr_fg_top_5_total, "S:/Supply Chain Projects/Linda Liang/Supply Chain Edge/MSTR manual file upload/IQR FG Top 5.xlsx")
-writexl::write_xlsx(iqr_fg_combined, "S:/Supply Chain Projects/Linda Liang/Supply Chain Edge/MSTR manual file upload/IQR FG.xlsx")
-writexl::write_xlsx(iqr_rm_top_5_total, "S:/Supply Chain Projects/Linda Liang/Supply Chain Edge/MSTR manual file upload/IQR RM Top 5.xlsx")
-writexl::write_xlsx(iqr_rm_combined, "S:/Supply Chain Projects/Linda Liang/Supply Chain Edge/MSTR manual file upload/IQR RM.xlsx")
-
-
-
-
+writexl::write_xlsx(iqr_fg_top_5_total, "C:/Users/slee/OneDrive - Ventura Foods/Ventura Work/SCE/Project/FY 24/Supply Chain Edge Micro Automation/Automation/IQR FG Top 5.xlsx")
+writexl::write_xlsx(iqr_fg_combined, "C:/Users/slee/OneDrive - Ventura Foods/Ventura Work/SCE/Project/FY 24/Supply Chain Edge Micro Automation/Automation/IQR FG.xlsx")
+writexl::write_xlsx(iqr_rm_top_5_total, "C:/Users/slee/OneDrive - Ventura Foods/Ventura Work/SCE/Project/FY 24/Supply Chain Edge Micro Automation/Automation/IQR RM Top 5.xlsx")
+writexl::write_xlsx(iqr_rm_combined, "C:/Users/slee/OneDrive - Ventura Foods/Ventura Work/SCE/Project/FY 24/Supply Chain Edge Micro Automation/Automation/IQR RM.xlsx")
+writexl::write_xlsx(po_reporting_tool_combined_data, "C:/Users/slee/OneDrive - Ventura Foods/Ventura Work/SCE/Project/FY 24/Supply Chain Edge Micro Automation/Automation/PO reporting Tool.xlsx")
