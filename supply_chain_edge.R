@@ -1,5 +1,3 @@
-# Line 859. need to meet Linda
-
 library(tidyverse)
 library(magrittr)
 library(openxlsx)
@@ -35,12 +33,6 @@ po_reporting_tool <- read_excel("C:/Users/slee/OneDrive - Ventura Foods/Ventura 
                                 sheet = "Daily Open PO")
 
 po_reporting_tool_pre <- read_excel("S:/Supply Chain Projects/Linda Liang/Supply Chain Edge/MSTR manual file upload/PO reporting Tool.xlsx")
-
-pqa <- readRDS("C:/Users/slee/OneDrive - Ventura Foods/Stan/R Codes/Projects/Supply Chain Edge Planning/venturafoods_supply_edge_planning/PQA Data/pqa_data_Aug 2022 to Jul 2023.rds")
-pqa_this_week_1 <- read_excel("S:/Supply Chain Projects/Linda Liang/PQA/JDE schedule attainment - July 2023.xlsx")
-pqa_this_week_2 <- lapply(excel_sheets("S:/Supply Chain Projects/Linda Liang/PQA/AS400 schedule attainment - Jul 2023.xlsx"), 
-                          function(name) read_excel("S:/Supply Chain Projects/Linda Liang/PQA/AS400 schedule attainment - Jul 2023.xlsx", 
-                                                    sheet = name))
 
 
 ##############################################################################################################################################################
@@ -836,49 +828,6 @@ colnames(po_reporting_tool_combined_data) <- po_reporting_tool_pre_data_col_name
 
 
 
-################## PQA #################
-pqa %>% 
-  dplyr::mutate(month_num = mdy(paste0(month, "01-", year))) -> pqa_data
-  
-
-oldest_date <- min(pqa_data$month_num, na.rm = TRUE)
-
-pqa_data %>% 
-  dplyr::filter(month_num != oldest_date) %>% 
-  dplyr::mutate(month_num = paste0(strip_leading_zero(format(month_num, format = "%m")))) %>% 
-  dplyr::select(-month_num, -missed_or_planned, -reason_code) -> pqa_data
-
-# pqa_this_week_1
-pqa_this_week_1[-1:-2, ] -> pqa_this_week_1_data
-colnames(pqa_this_week_1_data) <- pqa_this_week_1_data[1, ]
-pqa_this_week_1_data[-1, ] -> pqa_this_week_1_data
-
-pqa_this_week_1_data %>% 
-  janitor::clean_names() %>% 
-  data.frame() %>%
-  dplyr::select(branch_plant, line, item, scheduled_quantity, production_quantity) ######## I'm working on here now..############
-  
-
-# pqa_this_week_2
-pqa_this_week_2[[4]] -> pqa_loc_86
-pqa_this_week_2[[5]] -> pqa_loc_55
-pqa_this_week_2[[6]] -> pqa_loc_25
-
-pqa_loc_86[-1:-7,] -> pqa_loc_86
-colnames(pqa_loc_86) <- pqa_loc_86[1, ]
-pqa_loc_86[-1, ] -> pqa_loc_86
-
-pqa_loc_55[-1:-7,] -> pqa_loc_55
-colnames(pqa_loc_55) <- pqa_loc_55[1, ]
-pqa_loc_55[-1, ] -> pqa_loc_55
-
-pqa_loc_25[-1:-7,] -> pqa_loc_25
-colnames(pqa_loc_25) <- pqa_loc_25[1, ]
-pqa_loc_25[-1, ] -> pqa_loc_25
-
-rbind(pqa_loc_25, pqa_loc_55, pqa_loc_86) -> pqa_this_week_2_ver_2
-
-
 
 ##########################################################################################################################################################
 ######################################################################## export to .xlsx format ###########################################################
@@ -890,8 +839,3 @@ writexl::write_xlsx(iqr_fg_combined, "C:/Users/slee/OneDrive - Ventura Foods/Ven
 writexl::write_xlsx(iqr_rm_top_5_total, "C:/Users/slee/OneDrive - Ventura Foods/Ventura Work/SCE/Project/FY 24/Supply Chain Edge Micro Automation/Automation/IQR RM Top 5.xlsx")
 writexl::write_xlsx(iqr_rm_combined, "C:/Users/slee/OneDrive - Ventura Foods/Ventura Work/SCE/Project/FY 24/Supply Chain Edge Micro Automation/Automation/IQR RM.xlsx")
 writexl::write_xlsx(po_reporting_tool_combined_data, "C:/Users/slee/OneDrive - Ventura Foods/Ventura Work/SCE/Project/FY 24/Supply Chain Edge Micro Automation/Automation/PO reporting Tool.xlsx")
-
-# Change the file name here
-saveRDS(pqa_data_newerly_added, "C:/Users/slee/OneDrive - Ventura Foods/Stan/R Codes/Projects/Supply Chain Edge Planning/venturafoods_supply_edge_planning/PQA Data/pqa_data_Sep 2022 to Aug 2023.rds")
-
-
